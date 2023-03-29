@@ -47,7 +47,7 @@ app.post("/sign-up", async (req, res) => {
     .collection("users")
     .findOne({ userName: data.userName });
 
-  console.log(usernameCheck);
+  //console.log(usernameCheck);
   if (usernameCheck) {
     res.status(401).send({ message: "user name already exits try login" });
   } else if (data.password.length < 7) {
@@ -63,17 +63,53 @@ app.post("/sign-up", async (req, res) => {
     //____________________
 
     //get jwt token___________
-    const token = jwt.sign({ id: hashedPassword }, "mysecretkey");
+    //const token = jwt.sign({ id: hashedPassword }, "mysecretkey");
     //________________________
-    const patchedData = { ...data, token: token, password: hashedPassword };
+    const patchedData = {
+      ...data,
+      isVerified: false,
+      password: hashedPassword,
+    };
 
     const result = await client
       .db("url-shortner")
       .collection("users")
       .insertOne(patchedData);
 
-    res.send({ userName: data.userName, token: token });
+    console.log(result);
+
+    const config = {
+      service: "gmail",
+      auth: {
+        user: "raghunandanv19@gmail.com",
+        pass: "iwjhsijcarsdnwni",
+      },
+    };
+
+    const transport = nodemailer.createTransport(config);
+    const message = {
+      from: "raghunandanv19@gmail.com",
+      to: data.email,
+      subject: "Verification link",
+      text: `http://localhost:4000/account-verify/${result.insertedId}`,
+      html: `<h3>please click the below link to verify your account</h3> <p><a>http://localhost:4000/account-verify/${result.insertedId}</a></p>`,
+    };
+
+    await transport.sendMail(message);
+
+    res.send({ message: "activation link is sent to your email" });
   }
+});
+
+app.get("/account-verify/:id", async (req, res) => {
+  const { id } = req.params;
+  const findId = await client
+    .db("url-shortner")
+    .collection("users")
+    .updateOne({ _id: new ObjectId(id) }, { $set: { isVerified: true } });
+  console.log(findId);
+
+  res.redirect("http://localhost:3000/log-in");
 });
 
 app.post("/log-in", async (req, res) => {
