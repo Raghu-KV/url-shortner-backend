@@ -92,7 +92,7 @@ app.post("/sign-up", async (req, res) => {
       to: data.email,
       subject: "Verification link",
       text: `http://localhost:4000/account-verify/${result.insertedId}`,
-      html: `<h3>please click the below link to verify your account</h3> <p><a>http://localhost:4000/account-verify/${result.insertedId}</a></p>`,
+      html: `<h3>please click the below link to verify your account</h3> <p><a href='http://localhost:4000/account-verify/${result.insertedId}'>http://localhost:4000/account-verify/${result.insertedId}</a></p>`,
     };
 
     await transport.sendMail(message);
@@ -120,8 +120,33 @@ app.post("/log-in", async (req, res) => {
     .collection("users")
     .findOne({ userName: data.userName });
 
+  console.log(checkUser);
+
   if (!checkUser) {
-    res.status(401).send({ message: "invalid username or passworrd" });
+    res.status(401).send({ message: "invalid username or passworrd u" });
+  } else if (!checkUser.isVerified) {
+    const config = {
+      service: "gmail",
+      auth: {
+        user: "raghunandanv19@gmail.com",
+        pass: "iwjhsijcarsdnwni",
+      },
+    };
+
+    const transport = nodemailer.createTransport(config);
+    const message = {
+      from: "raghunandanv19@gmail.com",
+      to: checkUser.email,
+      subject: "Verification link",
+      text: `http://localhost:4000/account-verify/${checkUser._id}`,
+      html: `<h3>please click the below link to verify your account</h3> <p><a href='http://localhost:4000/account-verify/${checkUser._id}'>http://localhost:4000/account-verify/${checkUser._id}</a></p>`,
+    };
+
+    await transport.sendMail(message);
+
+    res
+      .status(401)
+      .send({ message: "verification link is sent to your email" });
   } else {
     const db_password = checkUser.password;
     const checkPass = await bcrypt.compare(data.password, db_password);
@@ -140,7 +165,7 @@ app.post("/log-in", async (req, res) => {
 
       res.send({ userName: checkUser.userName, token: token });
     } else {
-      res.status(401).send({ message: "invalid username or password" });
+      res.status(401).send({ message: "invalid username or password p" });
     }
   }
 });
