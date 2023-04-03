@@ -102,14 +102,19 @@ app.post("/sign-up", async (req, res) => {
 });
 
 app.get("/account-verify/:id", async (req, res) => {
-  const { id } = req.params;
-  const findId = await client
-    .db("url-shortner")
-    .collection("users")
-    .updateOne({ _id: new ObjectId(id) }, { $set: { isVerified: true } });
-  console.log(findId);
+  try {
+    const { id } = req.params;
+    const findId = await client
+      .db("url-shortner")
+      .collection("users")
+      .updateOne({ _id: new ObjectId(id) }, { $set: { isVerified: true } });
+    console.log(findId);
 
-  res.redirect("http://localhost:3000/log-in");
+    res.redirect("http://localhost:3000/log-in");
+  } catch (error) {
+    console.log(error);
+    res.send("something went wrong");
+  }
 });
 
 app.post("/log-in", async (req, res) => {
@@ -123,7 +128,7 @@ app.post("/log-in", async (req, res) => {
   console.log(checkUser);
 
   if (!checkUser) {
-    res.status(401).send({ message: "invalid username or passworrd u" });
+    res.status(401).send({ message: "invalid username or password u" });
   } else if (!checkUser.isVerified) {
     const config = {
       service: "gmail",
