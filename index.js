@@ -32,7 +32,7 @@ app.get("/who-has-logged-in", auth, async (req, res) => {
       .db("url-shortner")
       .collection("users")
       .findOne({ token: token });
-    res.send({ userName: data.userName });
+    res.send(data);
   } catch {
     res.status(401).send({ message: "token tampered" });
   }
