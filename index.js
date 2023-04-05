@@ -281,6 +281,19 @@ app.post("/short-this-url/:id", async (req, res) => {
 
   res.send({ shortUrl: findTheShortUrl.shortUrl });
 });
+//-------------------------------------------------------
+
+// redirect for short url--------------------------------
+app.get("/:shortId", async (req, res) => {
+  const { shortId } = req.params;
+  const url = await client
+    .db("url-shortner")
+    .collection("shortUrls")
+    .findOne({ shortUrl: `http://localhost:4000/${shortId}` });
+  console.log(url);
+  res.redirect(url.fullUrl);
+});
+
 //
 
 app.listen(PORT, () => console.log(`listening to ${PORT}`));
