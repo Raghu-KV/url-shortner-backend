@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import cors from "cors";
 import { ObjectId } from "mongodb";
 import nodemailer from "nodemailer";
+import shortid from "shortid";
 
 import { auth, linkAuth } from "./middleware/auth.js";
 const app = express();
@@ -251,5 +252,35 @@ app.post("/forget-password/:id/:token", linkAuth, async (req, res) => {
     res.status(401).send({ message: "id tampared" });
   }
 });
+
+// for shorter url this api is called in home.jsx in 45 line
+
+app.post("/short-this-url/:id", async (req, res) => {
+  const { id } = req.params;
+  const token = req.header("x-auth-token");
+  const shortId = shortid.generate();
+
+  const data = {
+    userId: new ObjectId(id),
+    fullUrl: req.body.url,
+    shortUrl: `http://localhost:4000/${shortId}`,
+    clicks: 0,
+  };
+  //console.log(data);
+
+  const insertedData = await client
+    .db("url-shortner")
+    .collection("shortUrls")
+    .insertOne(data);
+  console.log(insertedData);
+
+  const findTheShortUrl = await client
+    .db("url-shortner")
+    .collection("shortUrls")
+    .findOne({ _id: insertedData.insertedId });
+
+  res.send({ shortUrl: findTheShortUrl.shortUrl });
+});
+//
 
 app.listen(PORT, () => console.log(`listening to ${PORT}`));
