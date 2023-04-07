@@ -255,13 +255,13 @@ app.post("/forget-password/:id/:token", linkAuth, async (req, res) => {
 
 // for shorter url this api is called in home.jsx in 45 line
 
-app.post("/short-this-url/:id", async (req, res) => {
-  const { id } = req.params;
+app.post("/short-this-url/:userName", async (req, res) => {
+  const { userName } = req.params;
   const token = req.header("x-auth-token");
   const shortId = shortid.generate();
 
   const data = {
-    userId: new ObjectId(id),
+    userName: userName,
     fullUrl: req.body.url,
     shortUrl: `http://localhost:4000/${shortId}`,
     clicks: 0,
@@ -272,7 +272,7 @@ app.post("/short-this-url/:id", async (req, res) => {
     .db("url-shortner")
     .collection("shortUrls")
     .insertOne(data);
-  console.log(insertedData);
+  //console.log(insertedData);
 
   const findTheShortUrl = await client
     .db("url-shortner")
@@ -290,8 +290,30 @@ app.get("/:shortId", async (req, res) => {
     .db("url-shortner")
     .collection("shortUrls")
     .findOne({ shortUrl: `http://localhost:4000/${shortId}` });
-  console.log(url);
+  //console.log(url);
+
+  const updateClick = await client
+    .db("url-shortner")
+    .collection("shortUrls")
+    .updateOne(
+      { _id: new ObjectId(url._id) },
+      { $set: { clicks: url.clicks + 1 } }
+    );
+  //console.log("___", updateClick, "____");
+
   res.redirect(url.fullUrl);
+});
+
+app.get("/url-datas/table-of-urls", async (req, res) => {
+  const query = req.query;
+  //console.log(query);
+  const urlData = await client
+    .db("url-shortner")
+    .collection("shortUrls")
+    .find(query)
+    .toArray();
+  //console.log(urlData);
+  res.send(urlData);
 });
 
 //
