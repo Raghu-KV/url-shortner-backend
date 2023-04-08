@@ -20,7 +20,7 @@ console.log("mongo connected");
 //_______________________________________
 
 const frontEnd = "http://localhost:3000";
-const backEnd = "http://localhost:4000";
+const backEnd = "https://makeittiny.vercel.app";
 const PORT = process.env.PORT;
 app.use(express.json());
 app.use(cors());
