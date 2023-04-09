@@ -162,7 +162,7 @@ app.post("/log-in", async (req, res) => {
     //  console.log(checkPass);
 
     if (checkPass) {
-      const token = jwt.sign({ id: checkUser._id }, "mysecretkey");
+      const token = jwt.sign({ id: checkUser._id }, process.env.SECRET);
 
       const updateToken = await client
         .db("url-shortner")
@@ -190,7 +190,7 @@ app.post("/forget-password", async (req, res) => {
   //console.log(checkEmail);
 
   if (checkEmail) {
-    const token = jwt.sign({ id: checkEmail._id }, "mysecretkey", {
+    const token = jwt.sign({ id: checkEmail._id }, process.env.SECRET, {
       expiresIn: "10m",
     });
 
