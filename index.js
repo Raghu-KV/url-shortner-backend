@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
   res.send("express working successfully");
 });
 
-app.get("/who-has-logged-in", auth, async (req, res) => {
+app.get("/users/who-has-logged-in", auth, async (req, res) => {
   const token = req.header("x-auth-token");
   try {
     const data = await client
