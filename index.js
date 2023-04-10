@@ -19,7 +19,7 @@ await client.connect();
 console.log("mongo connected");
 //_______________________________________
 
-const frontEnd = "http://localhost:3000";
+const frontEnd = "https://make-it-short.netlify.app";
 const backEnd = "https://make-it-short.vercel.app";
 const PORT = process.env.PORT;
 app.use(express.json());
